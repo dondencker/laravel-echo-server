@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@types/node": "^6.0.38",
+    "laravel-echo": "^1.0.5",
     "typescript": "^2.0.2"
   },
   "bin": {

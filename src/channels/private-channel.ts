@@ -1,4 +1,5 @@
-var request = require('request');
+var request = require('request'),
+    url = require('url');
 import { Channel } from './channel';
 import { Log } from './../log';
 
@@ -25,14 +26,61 @@ export class PrivateChannel {
      * @return {Promise<any>}
      */
     authenticate(socket: any, data: any): Promise<any> {
+
+        var authHost = this.authHost();
+
+        if(this.options.authUsingReferrerHost)
+        {
+            var {referer} = socket.request.headers;
+
+            if(!referer)
+            {
+                return this.refuseAuth('No referer given.');
+            }
+
+            var {authReferrers} = this.options,
+                parsedReferrer = url.parse(referer),
+                host = parsedReferrer.hostname,
+                pass = false;
+
+            for(var r in authReferrers)
+            {
+                var pattern = authReferrers[r];
+
+                if(typeof pattern === "string" && pattern === host)
+                {
+                    pass = true;
+                    break;
+                }
+
+                if(pattern instanceof RegExp && pattern.test(host))
+                {
+                    pass = true;
+                    break;
+                }
+            }
+
+            if(!pass)
+            {
+                var validHosts = authReferrers.map(function(regex){ return regex.toString() }).join(", ");
+                return this.refuseAuth(`Referring host "${host}" is not valid. Should follow one of these patterns (${validHosts})`);
+            }
+
+            authHost = parsedReferrer.protocol + (parsedReferrer.slashes ? "//" : "") + host
+        }
+
         let options = {
-            url: this.authHost() + this.options.authEndpoint,
+            url: authHost + this.options.authEndpoint,
             form: { channel_name: data.channel },
             headers: (data.auth && data.auth.headers) ? data.auth.headers : {},
             rejectUnauthorized: false
         };
 
         return this.severRequest(socket, options);
+    }
+
+    refuseAuth(reason){
+        return new Promise<any>((resolve,reject)=>{reject(reason)})
     }
 
     /**

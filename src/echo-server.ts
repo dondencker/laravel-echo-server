@@ -17,6 +17,10 @@ export class EchoServer {
         authHost: null,
         authEndpoint: '/broadcasting/auth',
         database: 'redis',
+
+        authUsingReferrerHost: false,
+        authReferrers:[],
+
         databaseConfig: {
             redis: {},
             sqlite: {
