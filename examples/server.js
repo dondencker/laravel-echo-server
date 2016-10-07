@@ -5,7 +5,7 @@ var options = {
 
     authUsingReferrerHost: true,
     authReferrers : [
-        /.*\.example\.com/,
+        "*.example.com",
         "localhost",
         "127.0.0.1"
     ]

@@ -47,13 +47,15 @@ export class PrivateChannel {
             {
                 var pattern = authReferrers[r];
 
-                if(typeof pattern === "string" && pattern === host)
+                if(pattern.indexOf("*") > -1)
                 {
-                    pass = true;
-                    break;
+                    pattern = new RegExp("^"+pattern.replace(/\./g,'\\.').replace("*", ".+")+"$");
                 }
 
-                if(pattern instanceof RegExp && pattern.test(host))
+                if(
+                    (pattern instanceof RegExp && pattern.test(host))
+                    || pattern === host
+                )
                 {
                     pass = true;
                     break;

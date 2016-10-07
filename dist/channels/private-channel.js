@@ -16,11 +16,11 @@ class PrivateChannel {
             var { authReferrers } = this.options, parsedReferrer = url.parse(referer), host = parsedReferrer.hostname, pass = false;
             for (var r in authReferrers) {
                 var pattern = authReferrers[r];
-                if (typeof pattern === "string" && pattern === host) {
-                    pass = true;
-                    break;
+                if (pattern.indexOf("*") > -1) {
+                    pattern = new RegExp("^" + pattern.replace(/\./g, '\\.').replace("*", ".+") + "$");
                 }
-                if (pattern instanceof RegExp && pattern.test(host)) {
+                if ((pattern instanceof RegExp && pattern.test(host))
+                    || pattern === host) {
                     pass = true;
                     break;
                 }
